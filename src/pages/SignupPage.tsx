@@ -92,9 +92,9 @@ export default function SignupPage() {
         </form>
         <div className="text-center text-sm">
           <p className="text-slate-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-bold text-primary hover:text-primary-dark">
-              Sign in
+            By creating an account, you agree to our{' '}
+            <Link to="/terms" className="font-bold text-primary hover:text-primary-dark">
+              Terms of Service
             </Link>
           </p>
         </div>
