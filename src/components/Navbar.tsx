@@ -15,37 +15,41 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full glass-card border-b border-slate-200">
+    <nav className="sticky top-0 z-50 w-full glass-card border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="bg-primary p-1.5 rounded-lg">
+            <Link to="/" className="flex items-center space-x-3 group">
+              <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                 <ShieldCheck className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">
+              <span className="text-2xl font-black tracking-tight text-slate-900">
                 Legalize<span className="text-primary">AI</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-10">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
+                  "text-sm font-bold transition-all hover:text-primary relative group",
                   location.pathname === link.path ? "text-primary" : "text-slate-600"
                 )}
               >
                 {link.name}
+                <span className={cn(
+                  "absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full",
+                  location.pathname === link.path ? "w-full" : ""
+                )} />
               </Link>
             ))}
             <Link
               to="/dashboard"
-              className="bg-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
+              className="bg-primary text-white px-7 py-3 rounded-full text-sm font-bold hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0"
             >
               Get Started
             </Link>

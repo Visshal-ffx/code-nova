@@ -1,5 +1,5 @@
 {
-  "name": "LegalizeAI - AI Legal Simplifier",
-  "description": "Translate complex legal documents into plain English and highlight hidden risks instantly with AI.",
-  "requestFramePermissions": ["microphone"]
+  "name": "LegalizeAI - Legal & Safety Assistant",
+  "description": "Simplify complex legal documents and analyze ingredient safety for food, health, and cosmetics instantly with AI.",
+  "requestFramePermissions": ["microphone", "camera"]
 }

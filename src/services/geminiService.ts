@@ -20,6 +20,22 @@ export interface LegalAnalysis {
   realWorldImpact: string;
 }
 
+export interface IngredientAnalysis {
+  ingredients: {
+    name: string;
+    risk: 'Low' | 'Medium' | 'High';
+    side_effects: string;
+    explanation: string;
+  }[];
+  keyRisks: {
+    title: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high';
+  }[];
+  safety_score: number;
+  advice: string;
+}
+
 export async function analyzeLegalText(text: string): Promise<LegalAnalysis> {
   if (!GEMINI_API_KEY) {
     throw new Error("Gemini API key is missing. Please configure it in the Secrets panel.");
@@ -169,4 +185,110 @@ export async function fetchUrlContent(url: string): Promise<string> {
   // Since we are in a sandboxed environment, we can't easily fetch arbitrary URLs from the client due to CORS.
   // We'll suggest the user paste the text if the URL fetch fails.
   throw new Error("URL fetching is currently limited by CORS. Please paste the text directly for analysis.");
+}
+
+export async function analyzeIngredients(input: string, isImage: boolean = false, mimeType?: string): Promise<IngredientAnalysis> {
+  if (!GEMINI_API_KEY) {
+    throw new Error("Gemini API key is missing. Please configure it in the Secrets panel.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+  
+  const prompt = `You are a health, food, and cosmetic ingredient safety expert.
+  Analyze the following product ingredients and provide:
+  1. Ingredient name
+  2. Risk level (Low / Medium / High)
+  3. Possible side effects
+  4. Short and simple explanation (easy to understand)
+  Also provide:
+  5. Key Risks Identified: A summary of the most significant risks found across all ingredients.
+  6. Overall safety score (0 to 100)
+  7. General advice for using this product
+  
+  Return the response strictly in this JSON format:
+  {
+    "ingredients": [
+      {
+        "name": "",
+        "risk": "",
+        "side_effects": "",
+        "explanation": ""
+      }
+    ],
+    "keyRisks": [
+      {
+        "title": "",
+        "description": "",
+        "severity": ""
+      }
+    ],
+    "safety_score": 0,
+    "advice": ""
+  }
+  Keep the language simple and clear.`;
+
+  let contents: any;
+  if (isImage && input && mimeType) {
+    contents = {
+      parts: [
+        { inlineData: { data: input, mimeType: mimeType } },
+        { text: prompt }
+      ]
+    };
+  } else {
+    contents = `${prompt}\n\nIngredients: ${input}`;
+  }
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: contents,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          ingredients: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                risk: { type: Type.STRING, enum: ["Low", "Medium", "High"] },
+                side_effects: { type: Type.STRING },
+                explanation: { type: Type.STRING }
+              },
+              required: ["name", "risk", "side_effects", "explanation"]
+            }
+          },
+          keyRisks: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                description: { type: Type.STRING },
+                severity: { type: Type.STRING, enum: ["low", "medium", "high"] }
+              },
+              required: ["title", "description", "severity"]
+            }
+          },
+          safety_score: { type: Type.INTEGER },
+          advice: { type: Type.STRING }
+        },
+        required: ["ingredients", "keyRisks", "safety_score", "advice"]
+      }
+    }
+  });
+
+  const resultText = response.text;
+  if (!resultText) {
+    throw new Error("Failed to get a response from the AI.");
+  }
+
+  try {
+    return JSON.parse(resultText) as IngredientAnalysis;
+  } catch (e) {
+    console.error("Failed to parse AI response:", resultText);
+    throw new Error("Failed to parse the analysis result.");
+  }
 }

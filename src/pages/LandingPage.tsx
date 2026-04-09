@@ -1,46 +1,41 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Zap, Lock, Search, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Zap, Lock, Search, FileText, CheckCircle2, AlertTriangle, Beaker } from 'lucide-react';
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
-
+      <section className="relative pt-20 pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-primary border border-blue-100 mb-8">
+            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-primary/10 text-primary border border-primary/20 mb-8">
               <Zap className="w-4 h-4 mr-2" />
               Powered by Advanced Gemini AI
             </span>
             <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 leading-tight">
-              Understand Legal Documents <br />
-              <span className="gradient-text">In Seconds, Not Hours.</span>
+              Understand Legal Documents & <br />
+              <span className="gradient-text">Ingredient Safety Instantly.</span>
             </h1>
             <p className="text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Stop blindly clicking "I Agree". LegalizeAI translates complex Terms of Service, Privacy Policies, and Contracts into plain English while highlighting hidden risks.
+              Stop blindly clicking "I Agree" or guessing what's in your food. LegalizeAI translates complex legalese and analyzes product ingredients for hidden risks.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/dashboard"
                 className="w-full sm:w-auto bg-primary text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-primary-dark transition-all shadow-xl hover:shadow-2xl flex items-center justify-center group"
               >
-                Try Now
+                Go to Dashboard
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 to="/about"
-                className="w-full sm:w-auto bg-white text-slate-900 border border-slate-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-slate-50 transition-all flex items-center justify-center"
+                className="w-full sm:w-auto bg-white/50 backdrop-blur-sm text-slate-900 border border-slate-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-white transition-all flex items-center justify-center"
               >
                 How it Works
               </Link>
@@ -54,10 +49,10 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-20 relative max-w-4xl mx-auto"
           >
-            <div className="glass-card rounded-3xl p-6 shadow-2xl overflow-hidden border-slate-200 bg-white">
-              <div className="flex gap-8">
+            <div className="glass-card rounded-3xl p-6 shadow-2xl overflow-hidden">
+              <div className="flex flex-col md:flex-row gap-8">
                 {/* Scanned Document Mockup */}
-                <div className="flex-1 bg-slate-50 rounded-xl p-8 border border-slate-100 relative overflow-hidden">
+                <div className="flex-1 bg-slate-50/50 rounded-xl p-8 border border-slate-100 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 animate-scan" />
                   <div className="space-y-4">
                     <div className="h-4 w-1/3 bg-slate-200 rounded" />
@@ -69,16 +64,16 @@ export default function LandingPage() {
                     </div>
                     <div className="h-4 w-full bg-slate-100 rounded" />
                     <div className="h-4 w-5/6 bg-slate-100 rounded" />
-                    <div className="h-4 w-full bg-red-100 border-l-4 border-red-500 p-1 rounded-r">
-                      <span className="text-[10px] font-bold text-red-600 uppercase ml-2">Hidden Data Sharing</span>
+                    <div className="h-4 w-full bg-emerald-100 border-l-4 border-emerald-500 p-1 rounded-r">
+                      <span className="text-[10px] font-bold text-emerald-600 uppercase ml-2">Safe Ingredient Identified</span>
                     </div>
                     <div className="h-4 w-full bg-slate-100 rounded" />
                   </div>
                 </div>
 
                 {/* AI Analysis Overlay */}
-                <div className="w-72 hidden md:flex flex-col gap-4">
-                  <div className="bg-red-50 border border-red-100 p-4 rounded-2xl shadow-sm">
+                <div className="w-full md:w-72 flex flex-col gap-4">
+                  <div className="bg-red-50/80 backdrop-blur-sm border border-red-100 p-4 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="w-5 h-5 text-red-600" />
                       <span className="text-sm font-bold text-red-900">High Risk Detected</span>
@@ -87,13 +82,13 @@ export default function LandingPage() {
                       This document contains clauses that allow third-party data sharing without your explicit consent.
                     </p>
                   </div>
-                  <div className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg">
+                  <div className="bg-slate-900/90 backdrop-blur-sm p-4 rounded-2xl text-white shadow-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-bold">AI Summary</span>
+                      <span className="text-sm font-bold">AI Safety Score: 85</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Auto-renewal active after 12 months. Mandatory arbitration in Delaware.
+                      Product is generally safe, but contains Phenoxyethanol which may cause skin irritation for some users.
                     </p>
                   </div>
                 </div>
@@ -117,11 +112,11 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Powerful Features for Legal Clarity</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">Our AI engine is trained on thousands of legal documents to give you the most accurate analysis possible.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Powerful Features for Your Safety</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">Our AI engine is trained on thousands of documents and ingredient databases to give you the most accurate analysis possible.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -129,23 +124,23 @@ export default function LandingPage() {
               {
                 icon: <Search className="w-8 h-8 text-primary" />,
                 title: "AI Risk Detection",
-                desc: "Automatically scan for arbitration clauses, hidden fees, and data sharing risks."
+                desc: "Automatically scan for arbitration clauses, hidden fees, and data sharing risks in any document."
               },
               {
-                icon: <FileText className="w-8 h-8 text-primary" />,
-                title: "Plain English Summary",
-                desc: "Get a concise, jargon-free summary of exactly what you're signing up for."
+                icon: <Beaker className="w-8 h-8 text-primary" />,
+                title: "Ingredient Safety",
+                desc: "Identify harmful chemicals, allergens, and side effects in food and cosmetic products."
               },
               {
                 icon: <ShieldCheck className="w-8 h-8 text-primary" />,
                 title: "Privacy Risk Scanner",
-                desc: "Understand how your personal data is handled, stored, and sold."
+                desc: "Understand how your personal data is handled, stored, and sold by the services you use."
               }
             ].map((feature, idx) => (
               <motion.div
                 key={idx}
                 whileHover={{ y: -5 }}
-                className="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-xl transition-all"
+                className="p-8 rounded-3xl border border-white/40 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-xl transition-all"
               >
                 <div className="mb-6">{feature.icon}</div>
                 <h3 className="text-xl font-bold text-slate-900 mb-4">{feature.title}</h3>
