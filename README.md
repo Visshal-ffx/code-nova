@@ -1,20 +1,43 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# ⚖️ LegalizeAI - AI Legal Document Simplifier
 
-# Run and deploy your AI Studio app
+**LegalizeAI** is a powerful web application designed to demystify complex legal documents. Using Google's Gemini AI, it translates dense legalese into plain English, highlights hidden risks, and provides a real-world impact analysis—all in seconds.
 
-This contains everything you need to run your app locally.
+![LegalizeAI Preview](https://picsum.photos/seed/legal/1200/600)
 
-View your app in AI Studio: https://ai.studio/apps/d9a65354-c215-4dea-87b8-0c308a987f7c
+## 🚀 Features
 
-## Run Locally
+- **Multi-format Support:** Paste text, upload PDFs/DOCX, or even scan images of physical documents.
+- **AI Risk Scoring:** Get an instant risk level (Low, Medium, High) and a 0-100 risk score.
+- **Jargon Translation:** Automatically identifies complex legal terms and explains them in simple language.
+- **Voice Assistant:** A compact, interactive voice assistant that can summarize the report and answer follow-up questions.
+- **History Tracking:** Keep track of your recently analyzed documents.
 
-**Prerequisites:**  Node.js
+## 🛠️ Tech Stack
 
+- **Frontend:** React 19, TypeScript, Vite
+- **Styling:** Tailwind CSS 4
+- **Animations:** Motion (formerly Framer Motion)
+- **AI Engine:** Google Gemini AI (@google/genai)
+- **Icons:** Lucide React
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🌐 Deployment (Netlify)
+
+This project is optimized for **Netlify** with "zero-man" configuration.
+
+1. **Push to GitHub:** Upload this project to a GitHub repository.
+2. **Connect to Netlify:** Create a new site from Git on Netlify.
+3. **Automatic Config:** Netlify will automatically use the included `netlify.toml` for build settings.
+4. **Environment Variables:** 
+   - Go to **Site Settings > Environment Variables**.
+   - Add `GEMINI_API_KEY` with your Google AI API key.
+5. **Done!** Your app will be live with full SPA routing support.
+
+## 🔑 Environment Variables
+
+To run this project locally or in production, you need:
+
+- `GEMINI_API_KEY`: Your Google Gemini API Key.
+
+## 📜 License
+
+This project is licensed under the Apache-2.0 License.
