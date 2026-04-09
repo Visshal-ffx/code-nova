@@ -1,0 +1,5 @@
+{
+  "name": "LegalizeAI - AI Legal Simplifier",
+  "description": "Translate complex legal documents into plain English and highlight hidden risks instantly with AI.",
+  "requestFramePermissions": ["microphone"]
+}
