@@ -1,5 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+// This variable is populated from process.env.GEMINI_API_KEY at build time via vite.config.ts
+// On Netlify, ensure you set GEMINI_API_KEY in the Site Settings > Environment Variables.
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 
 export interface LegalAnalysis {
