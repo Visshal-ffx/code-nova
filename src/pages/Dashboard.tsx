@@ -8,13 +8,15 @@ import AnalysisResult from '@/src/components/AnalysisResult';
 import IngredientAnalysisResult from '@/src/components/IngredientAnalysisResult';
 import VoiceAssistant from '@/src/components/HybridVoiceAssistant';
 import { cn } from '@/src/lib/utils';
+import mammoth from 'mammoth';
 
 export default function Dashboard() {
   const [analysisType, setAnalysisType] = React.useState<'legal' | 'ingredients'>('legal');
   const [inputMode, setInputMode] = React.useState<'paste' | 'upload' | 'url' | 'image'>('paste');
   const [text, setText] = React.useState('');
   const [url, setUrl] = React.useState('');
-  const [image, setImage] = React.useState<{ base64: string; mimeType: string } | null>(null);
+  const [fileName, setFileName] = React.useState<string | null>(null);
+  const [fileData, setFileData] = React.useState<{ base64: string; mimeType: string } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [legalResult, setLegalResult] = React.useState<LegalAnalysis | null>(null);
   const [ingredientResult, setIngredientResult] = React.useState<IngredientAnalysis | null>(null);
@@ -26,18 +28,43 @@ export default function Dashboard() {
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
+      setFileName(file.name);
+      
+      // Special handling for Word documents (extract text)
+      if (file.type.includes('officedocument') || file.type.includes('wordprocessingml')) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          try {
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            setText(result.value);
+            setFileData(null);
+            // We stay in the current mode but the text is now ready
+          } catch (err) {
+            console.error("Mammoth error:", err);
+            setError("Failed to extract text from Word document. Please try copying and pasting the text instead.");
+          }
+        };
+        reader.readAsArrayBuffer(file);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
+        
+        // If it's a file that Gemini can process directly (PDF, Image)
         if (file.type.startsWith('image/') || file.type === 'application/pdf') {
           const base64 = content.split(',')[1];
-          setImage({ base64, mimeType: file.type });
-          setInputMode('image');
+          setFileData({ base64, mimeType: file.type });
+          setText(''); 
         } else {
+          // Otherwise treat as plain text
           setText(content);
-          setInputMode('paste');
+          setFileData(null);
         }
       };
+
       if (file.type.startsWith('image/') || file.type === 'application/pdf') {
         reader.readAsDataURL(file);
       } else {
@@ -61,7 +88,8 @@ export default function Dashboard() {
 
   const handleAnalyze = async () => {
     if (inputMode === 'paste' && !text.trim()) return;
-    if (inputMode === 'image' && !image) return;
+    if ((inputMode === 'upload' || inputMode === 'image') && !fileData && !text.trim()) return;
+    if (inputMode === 'url' && !url.trim()) return;
     
     setIsAnalyzing(true);
     setError(null);
@@ -72,8 +100,8 @@ export default function Dashboard() {
     try {
       if (analysisType === 'legal') {
         let analysis: LegalAnalysis;
-        if (inputMode === 'image' && image) {
-          analysis = await analyzeLegalDocumentFile(image.base64, image.mimeType);
+        if (fileData) {
+          analysis = await analyzeLegalDocumentFile(fileData.base64, fileData.mimeType);
         } else {
           analysis = await analyzeLegalText(text);
         }
@@ -81,7 +109,7 @@ export default function Dashboard() {
         
         const newHistoryItem = {
           id: Math.random().toString(36).substr(2, 9),
-          name: inputMode === 'image' ? "Legal Scan" : (text.substring(0, 30) + "..."),
+          name: fileName || (text.substring(0, 30) + "..."),
           date: new Date().toLocaleDateString(),
           type: 'legal' as const,
           result: analysis
@@ -89,8 +117,8 @@ export default function Dashboard() {
         setHistory(prev => [newHistoryItem, ...prev].slice(0, 10));
       } else {
         let analysis: IngredientAnalysis;
-        if (inputMode === 'image' && image) {
-          analysis = await analyzeIngredients(image.base64, true, image.mimeType);
+        if (fileData) {
+          analysis = await analyzeIngredients(fileData.base64, true, fileData.mimeType);
         } else {
           analysis = await analyzeIngredients(text);
         }
@@ -98,7 +126,7 @@ export default function Dashboard() {
 
         const newHistoryItem = {
           id: Math.random().toString(36).substr(2, 9),
-          name: inputMode === 'image' ? "Ingredient Scan" : (text.substring(0, 30) + "..."),
+          name: fileName || (text.substring(0, 30) + "..."),
           date: new Date().toLocaleDateString(),
           type: 'ingredients' as const,
           result: analysis
@@ -115,7 +143,8 @@ export default function Dashboard() {
   const clearAll = () => {
     setText('');
     setUrl('');
-    setImage(null);
+    setFileName(null);
+    setFileData(null);
     setLegalResult(null);
     setIngredientResult(null);
     setError(null);
@@ -308,16 +337,22 @@ export default function Dashboard() {
                     )}
                   >
                     <input {...getInputProps()} />
-                    <div className="bg-white p-4 rounded-full shadow-sm mb-4">
-                      <Upload className="w-8 h-8 text-primary" />
-                    </div>
-                    <p className="text-lg font-bold text-slate-900">Click or drag file to upload</p>
-                    <p className="text-sm text-slate-500 mt-2">Supports PDF, DOCX, TXT (Max 5MB)</p>
-                    {text && (
-                      <p className="mt-4 text-emerald-600 font-medium flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
-                        File loaded successfully
-                      </p>
+                    {fileName ? (
+                      <div className="flex flex-col items-center">
+                        <div className="bg-emerald-100 p-4 rounded-full mb-4">
+                          <CheckCircle className="w-8 h-8 text-emerald-600" />
+                        </div>
+                        <p className="text-lg font-bold text-slate-900">{fileName}</p>
+                        <p className="text-sm text-slate-500 mt-1">File loaded successfully</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="bg-white p-4 rounded-full shadow-sm mb-4">
+                          <Upload className="w-8 h-8 text-primary" />
+                        </div>
+                        <p className="text-lg font-bold text-slate-900">Click or drag file to upload</p>
+                        <p className="text-sm text-slate-500 mt-2">Supports PDF, DOCX, TXT (Max 5MB)</p>
+                      </>
                     )}
                   </div>
                 </motion.div>
@@ -366,17 +401,17 @@ export default function Dashboard() {
                     )}
                   >
                     <input {...getInputProps()} />
-                    {image ? (
+                    {fileData || text ? (
                       <div className="relative w-full h-full p-4 flex items-center justify-center">
-                        {image.mimeType === 'application/pdf' ? (
+                        {(!fileData || fileData.mimeType === 'application/pdf' || fileData.mimeType.includes('officedocument')) ? (
                           <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-lg border border-slate-200">
                             <File className="w-16 h-16 text-primary mb-4" />
-                            <p className="font-bold text-slate-900">PDF Document Loaded</p>
+                            <p className="font-bold text-slate-900">{fileName || "Document Loaded"}</p>
                             <p className="text-xs text-slate-500">Ready for analysis</p>
                           </div>
                         ) : (
                           <img 
-                            src={`data:${image.mimeType};base64,${image.base64}`} 
+                            src={`data:${fileData.mimeType};base64,${fileData.base64}`} 
                             alt="Document Preview" 
                             className="max-h-full rounded-lg shadow-lg"
                             referrerPolicy="no-referrer"
@@ -413,10 +448,10 @@ export default function Dashboard() {
             <div className="mt-8 flex justify-end">
               <button
                 onClick={handleAnalyze}
-                disabled={isAnalyzing || (inputMode === 'paste' && !text.trim()) || (inputMode === 'url' && !url.trim()) || (inputMode === 'image' && !image)}
+                disabled={isAnalyzing || (inputMode === 'paste' && !text.trim()) || (inputMode === 'url' && !url.trim()) || ((inputMode === 'upload' || inputMode === 'image') && !fileData && !text.trim())}
                 className={cn(
                   "px-10 py-4 rounded-full text-lg font-bold transition-all flex items-center gap-3 shadow-xl",
-                  isAnalyzing || (inputMode === 'paste' && !text.trim()) || (inputMode === 'url' && !url.trim()) || (inputMode === 'image' && !image)
+                  isAnalyzing || (inputMode === 'paste' && !text.trim()) || (inputMode === 'url' && !url.trim()) || ((inputMode === 'upload' || inputMode === 'image') && !fileData && !text.trim())
                     ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                     : "bg-primary text-white hover:bg-primary-dark hover:shadow-2xl"
                 )}

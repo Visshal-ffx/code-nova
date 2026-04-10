@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertTriangle, CheckCircle, Info, ShieldCheck, Beaker, ClipboardList } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, ShieldCheck, Beaker, ClipboardList, Copy, Download, Share2 } from 'lucide-react';
 import type { IngredientAnalysis } from '@/src/services/geminiService';
 import { cn } from '@/src/lib/utils';
 
@@ -9,6 +9,41 @@ interface IngredientAnalysisResultProps {
 }
 
 export default function IngredientAnalysisResult({ analysis }: IngredientAnalysisResultProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const copyAdvice = () => {
+    navigator.clipboard.writeText(analysis.advice);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadAnalysis = () => {
+    const content = `Ingredient Safety Analysis\n\nSafety Score: ${analysis.safety_score}/100\n\nAdvice:\n${analysis.advice}\n\nKey Risks:\n${analysis.keyRisks.map(r => `- ${r.title}: ${r.description}`).join('\n')}\n\nIngredients:\n${analysis.ingredients.map(i => `- ${i.name} (${i.risk} risk): ${i.explanation}`).join('\n')}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `IngredientAnalysis_${new Date().getTime()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const shareAnalysis = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Ingredient Safety Analysis',
+          text: analysis.advice,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      copyAdvice();
+    }
+  };
+
   const getRiskColor = (risk: string) => {
     switch (risk.toLowerCase()) {
       case 'high': return 'text-red-600 bg-red-50 border-red-200';
@@ -36,10 +71,38 @@ export default function IngredientAnalysisResult({ analysis }: IngredientAnalysi
       {/* Safety Score Card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 glass-card p-8 rounded-3xl border-l-8 border-l-primary flex flex-col justify-center">
-          <h3 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <ShieldCheck className="w-8 h-8 text-primary" />
-            General Safety Advice
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+              General Safety Advice
+            </h3>
+            <div className="flex space-x-2">
+              <button 
+                onClick={copyAdvice} 
+                className={cn(
+                  "p-2 rounded-lg transition-all flex items-center gap-2",
+                  copied ? "bg-emerald-500 text-white" : "hover:bg-slate-100"
+                )} 
+                title="Copy Advice"
+              >
+                {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+              </button>
+              <button 
+                onClick={downloadAnalysis}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors" 
+                title="Download Analysis"
+              >
+                <Download className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={shareAnalysis}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors" 
+                title="Share"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           <p className="text-lg text-slate-700 leading-relaxed italic">
             "{analysis.advice}"
           </p>

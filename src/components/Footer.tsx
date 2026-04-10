@@ -27,7 +27,7 @@ export default function Footer() {
               <li><Link to="/dashboard" className="hover:text-primary transition-colors">Analyzer</Link></li>
               <li><Link to="/about" className="hover:text-primary transition-colors">How it Works</Link></li>
               <li><Link to="/help" className="hover:text-primary transition-colors">Help & FAQ</Link></li>
-              <li><Link to="#" className="hover:text-primary transition-colors">API Access</Link></li>
+              <li><Link to="/about" className="hover:text-primary transition-colors">Our Mission</Link></li>
             </ul>
           </div>
 

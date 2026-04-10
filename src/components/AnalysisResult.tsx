@@ -29,9 +29,39 @@ export default function AnalysisResult({ analysis }: AnalysisResultProps) {
     }
   };
 
+  const [copied, setCopied] = React.useState(false);
+
   const copySummary = () => {
     navigator.clipboard.writeText(analysis.summary);
-    // In a real app, show a toast
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadAnalysis = () => {
+    const content = `Legal Analysis Summary\n\nRisk Level: ${analysis.riskLevel}\nRisk Score: ${analysis.riskScore}/100\n\nSummary:\n${analysis.summary}\n\nKey Risks:\n${analysis.keyRisks.map(r => `- ${r.title}: ${r.description}`).join('\n')}\n\nReal World Impact:\n${analysis.realWorldImpact}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LegalAnalysis_${new Date().getTime()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const shareAnalysis = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Legal Analysis Result',
+          text: analysis.summary,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      copySummary();
+    }
   };
 
   return (
@@ -49,13 +79,28 @@ export default function AnalysisResult({ analysis }: AnalysisResultProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold">Overall Risk: {analysis.riskLevel}</h3>
             <div className="flex space-x-2">
-              <button onClick={copySummary} className="p-2 hover:bg-white/50 rounded-lg transition-colors" title="Copy Summary">
-                <Copy className="w-5 h-5" />
+              <button 
+                onClick={copySummary} 
+                className={cn(
+                  "p-2 rounded-lg transition-all flex items-center gap-2",
+                  copied ? "bg-emerald-500 text-white" : "hover:bg-white/50"
+                )} 
+                title="Copy Summary"
+              >
+                {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
               </button>
-              <button className="p-2 hover:bg-white/50 rounded-lg transition-colors" title="Download PDF">
+              <button 
+                onClick={downloadAnalysis}
+                className="p-2 hover:bg-white/50 rounded-lg transition-colors" 
+                title="Download Analysis"
+              >
                 <Download className="w-5 h-5" />
               </button>
-              <button className="p-2 hover:bg-white/50 rounded-lg transition-colors" title="Share">
+              <button 
+                onClick={shareAnalysis}
+                className="p-2 hover:bg-white/50 rounded-lg transition-colors" 
+                title="Share"
+              >
                 <Share2 className="w-5 h-5" />
               </button>
             </div>
